@@ -18,8 +18,4 @@ eingabe, fft_data, matrices_and_multply
 from eingabe import input_data
 
 if __name__ == '__main__':
-    import numpy as np
-    data = input_data()[1]
-    print(np.shape(data)[1])
     pass
-
