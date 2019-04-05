@@ -52,5 +52,13 @@ if __name__ == '__main__':
 
     M_case = build_M_matrices_list(s_data)[15]
 
-    print('P=', P_value(H, M_case))
+    import time
+
+    start = time.time()
+    print('P(k=(0.2,0.2,0.2))', P_value(H, M_case))
+    k_vector = (-0.2, 0.2, 0.2)
+    H = H_matrix(k_vector)
+    print('P(k=(-0.2,0.2,0.2))', P_value(H, M_case))
     # It seems that we should use np.real(P)
+    end = time.time()
+    print('it takes', end - start, 'seconds to calculate a P value.')
