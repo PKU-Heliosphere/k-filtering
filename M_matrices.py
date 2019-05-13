@@ -1,9 +1,6 @@
 import fft_data
 import numpy as np
-
-LEN_FFT = fft_data.LEN_FFT
-LEN_DATA = 4096
-LEN_OVERLAP = 256
+from parameters import LEN_FFT, LEN_DATA, LEN_MOVE_ONCE
 
 
 def accumulate_A_vectors(all_sate_data):
@@ -34,7 +31,7 @@ def accumulate_A_vectors(all_sate_data):
         # print(result[0])
 
         # run the next line at the end of one cycle
-        start_point += LEN_OVERLAP
+        start_point += LEN_MOVE_ONCE
 
     return result
 
@@ -64,7 +61,7 @@ def build_M_matrices_list(all_sate_data):
             # calculate A*A.T.conj this line
 
         # run the next line at the end of one cycle
-        start_point += LEN_OVERLAP
+        start_point += LEN_MOVE_ONCE
 
     return result
 

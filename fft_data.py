@@ -1,7 +1,6 @@
 import numpy as np
 
-LEN_FFT = 1024
-dt = 0.0625  # second(s)
+from parameters import LEN_FFT, dt
 
 
 def fft_one_satellite_one_interval(part_data, start_point=0):

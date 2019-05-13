@@ -6,11 +6,11 @@ LOC_SATELLITES = [(0, 0, 0),
                   (-5.09375, 1.1328125, -1.6254883)]
 n_k = 40
 
-def get_k_list():
 
-    kx_list = np.linspace(-0.3,0.3,n_k)
-    ky_list = np.linspace(-0.3,0.3,n_k)
-    kz_list = np.linspace(-0.3,0.3,n_k)
+def get_k_list():
+    kx_list = np.linspace(-0.3, 0.3, n_k)
+    ky_list = np.linspace(-0.3, 0.3, n_k + 1)
+    kz_list = np.linspace(-0.3, 0.3, n_k - 1)
 
     k_list = list()
 
@@ -20,7 +20,7 @@ def get_k_list():
                 k_list.append((kx, ky, kz))
 
     # (kx1, ky1, kz1), (kx1, ky1, kz2), ...
-    return k_list,kx_list,ky_list,kz_list
+    return k_list, kx_list, ky_list, kz_list
 
 
 if __name__ == '__main__':
