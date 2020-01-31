@@ -4,25 +4,25 @@ import numpy as np
 
 def input_data_B_field():
     mms1_cdf = pycdf.CDF(
-        '/Users/linrong/SpaceScience/MMSdata_n_code/MMS_fgm_srvy/mms1_fgm_srvy_l2_20170130_v5.87.0.cdf ')
+        '/Users/linrong/SpaceScience/MMSdata_n_code/MMS_fgm_srvy/mms1_fgm_srvy_l2_20151016_v4.18.0.cdf')
     mms2_cdf = pycdf.CDF(
-        '/Users/linrong/SpaceScience/MMSdata_n_code/MMS_fgm_srvy/mms2_fgm_srvy_l2_20170130_v5.87.0.cdf ')
+        '/Users/linrong/SpaceScience/MMSdata_n_code/MMS_fgm_srvy/mms2_fgm_srvy_l2_20151016_v4.18.0.cdf')
     mms3_cdf = pycdf.CDF(
-        '/Users/linrong/SpaceScience/MMSdata_n_code/MMS_fgm_srvy/mms3_fgm_srvy_l2_20170130_v5.87.0.cdf ')
+        '/Users/linrong/SpaceScience/MMSdata_n_code/MMS_fgm_srvy/mms3_fgm_srvy_l2_20151016_v4.18.0.cdf')
     mms4_cdf = pycdf.CDF(
-        '/Users/linrong/SpaceScience/MMSdata_n_code/MMS_fgm_srvy/mms4_fgm_srvy_l2_20170130_v5.87.0.cdf ')
+        '/Users/linrong/SpaceScience/MMSdata_n_code/MMS_fgm_srvy/mms4_fgm_srvy_l2_20151016_v4.18.0.cdf')
 
-    indexstart = 229750  # 229750
+    indexstart = 398113  # 229750
     time_start = 0.0
-    dt = mms1_cdf['Epoch'][229751].timestamp() - mms1_cdf['Epoch'][229750].timestamp()
-    numofpoints = 4096  # substitute: 2048
+    dt = mms1_cdf['Epoch'][398123].timestamp() - mms1_cdf['Epoch'][398122].timestamp()
+    numofpoints = 1024+128+10  # substitute: 4096 or some num
     time_end = numofpoints * dt
     time_series = np.linspace(time_start, time_end, numofpoints)
 
     offset1 = 0
-    offset2 = -55
-    offset3 = 6
-    offset4 = -45
+    offset2 = 100
+    offset3 = 113
+    offset4 = 45
     sampled_data = list()
 
     mms1_data = mms1_cdf['mms1_fgm_b_gse_srvy_l2'][indexstart + offset1:indexstart + offset1 + numofpoints]
@@ -83,7 +83,7 @@ def input_data_E_field():
 
 
 if __name__ == '__main__':
-    t_s, s_data = input_data_E_field()
-    np.save('format_E_data',s_data)
+    # t_s, s_data = input_data_E_field()
+    # np.save('format_E_data',s_data)
     t_s_B, s_data_B = input_data_B_field()
     np.save('format_B_data',s_data_B)

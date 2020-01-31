@@ -44,13 +44,11 @@ if __name__ == '__main__':
     H = H_matrix(k_vector)
     print(H)
 
-    from eingabe import input_data
-
-    t_s, s_data = input_data()
+    s_data = np.load('simulated_signal.npy')
 
     from M_matrices import build_M_matrices_list
 
-    M_case = build_M_matrices_list(s_data)[15]
+    M_case = build_M_matrices_list(s_data)[10]
 
     import time
 

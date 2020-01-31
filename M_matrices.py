@@ -1,6 +1,7 @@
 import fft_data
 import numpy as np
 from parameters import LEN_FFT, LEN_DATA, LEN_MOVE_ONCE
+from coor_transform import coor_transform_Bavg_equals_Bz
 
 
 def accumulate_A_vectors(all_sate_data):
@@ -53,23 +54,48 @@ def build_M_matrices_list(all_sate_data):
     for i in range(LEN_FFT // 2 + 1):
         result.append(np.zeros((12, 12), dtype='complex128'))
     start_point = 0
+    count = 0
     while start_point + LEN_FFT < LEN_DATA:
-        fft_this_interval = fft_data.fft_all_satellite(all_sate_data=all_sate_data,
-                                                       start_point=start_point)
+        print(start_point)
+        do_change_coordinate = False  # 改这里就好了改这里就好了改这里就好了改这里就好了改这里就好了
+        if do_change_coordinate:
+            # 下面几行是需要变换参考系，使得z朝向B_average的。
+            transformed_data_this_interval = \
+                coor_transform_Bavg_equals_Bz(all_sate_data[:, start_point:start_point + LEN_FFT])
+            all_sate_data_partially_altered = all_sate_data.copy()
+            all_sate_data_partially_altered[:, start_point:start_point + LEN_FFT] = transformed_data_this_interval
+            # 上面这三行：只对需要的那个部分做参考系变化。
+            fft_this_interval = fft_data.fft_all_satellite(all_sate_data=all_sate_data_partially_altered,
+                                                           start_point=start_point)
+
+            # 这下面一行呢，是不变换参考系的。
+        else:
+            fft_this_interval = fft_data.fft_all_satellite(all_sate_data=all_sate_data,
+                                                           start_point=start_point)
+
+            # 下面一行呢，是之前写的备注，体现出我的恐惧。
+            # 这里改了一下，传进去的数据是：all_sate_data，其他地方不变，但是在start_point开始的一个LEN_FFT变换了参考系
+            # 有点担心这个copy...
+
         for i in range(len(fft_this_interval)):
             result[i] += A_vec_to_M(np.array(fft_this_interval[i]))
             # calculate A*A.T.conj this line
 
         # run the next line at the end of one cycle
         start_point += LEN_MOVE_ONCE
+        count += 1
+    for i in range(len(fft_this_interval)):
+        result[i] = result[i] / count
+        # 除一下count做平均吧～
+        # 20190713晚上添加。
 
     return result
 
 
 if __name__ == '__main__':
-    from eingabe import input_data
+    from eingabe import input_data_B_field
 
-    t_s, s_data = input_data()
+    t_s, s_data = input_data_B_field()
 
     # check the first function: accumulate_A_vectors()
     res = accumulate_A_vectors(s_data)

@@ -41,7 +41,7 @@ def fft_all_satellite(all_sate_data, start_point=0):
     :return:
     """
     result = list()
-    num_of_omega = 513  # =1024/2+1
+    num_of_omega = LEN_FFT//2+1  # =1024/2+1
     for one_sate_data in all_sate_data:
         Ax_fft, Ay_fft, Az_fft = fft_one_satellite_one_interval(one_sate_data, start_point=start_point)
         result.append(reformat_fft_result(Ax_fft, Ay_fft, Az_fft))
@@ -52,13 +52,15 @@ def fft_all_satellite(all_sate_data, start_point=0):
             result[0][index] += res_one_sate[index]
             # add components from other 3 satellites to the first satellite,
             # so as to build shape: 513(omegas) * 12(components).
+            # 20190714note: the '+=' here implies the addition of tuples, which connect 2 tuples rather than
+            #               add the components like that in the numpy array.
     return result[0]
 
 
 if __name__ == '__main__':
-    from eingabe import input_data
+    from eingabe import input_data_B_field
 
-    t_s, s_data = input_data()
+    t_s, s_data = input_data_B_field()
 
     import time
 
