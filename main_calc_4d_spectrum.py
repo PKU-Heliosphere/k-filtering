@@ -17,7 +17,6 @@ My work started on March the 30th.
 import numpy as np
 from location_and_klist import get_k_list, n_k
 from M_matrices import build_M_matrices_list
-from eingabe import input_data_E_field
 from filter_centrl_algrthm import H_matrix, P_value
 import time
 
@@ -36,7 +35,7 @@ def calc_spectrum_4d():
     # if one want to use fewer omegas, just dis-comment 'BIG_NUM_OMEGAS = NUM_OF_OMEGAS'.
 
     s_data = np.load('Eprime2_brst_data.npy')  # change this line to change the input file.
-    save_name = 'big_omega_spectrum_4d_Eprime2'  # change this line to change the name of the saved file.
+    save_name = 'spectrum_4d'  # change this line to change the name of the saved file.
 
     M_mat_list = build_M_matrices_list(s_data)[:BIG_NUM_OMEGAS]
 
@@ -59,7 +58,7 @@ def calc_spectrum_4d():
                     n = n + 1
 
         end = time.time()
-        print('n k total =', n, ', it takes', end - start, 'second(s) to calculate using this omega:',
+        print('n k total = '+str(n)+ ', it takes', end - start, 'second(s) to calculate using this omega:',
               omega, '(' + str(count) + '/' + str(BIG_NUM_OMEGAS) + ')')
         spectrum_4d.append(result)
         count += 1
