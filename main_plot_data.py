@@ -13,7 +13,7 @@ def plot_ki_kj_plane_accumulated(ax, spectrum_4d, ki='kx', kj='ky'):
     k_list_dic = {'kx': kx_list, 'ky': ky_list, 'kz': kz_list}
     k_i, k_j = ki[0] + '_' + ki[1], kj[0] + '_' + kj[1]
 
-    DO_LOG = False
+    DO_LOG = True
     if DO_LOG:
         contour = ax.contourf(k_list_dic[kj], k_list_dic[ki], np.log(spec_for_plot))
         ax.set_title('$\\log{P}(' + k_i + ',' + k_j + ')$', fontsize=15)
@@ -48,7 +48,7 @@ def plot_omega_ki_plane_accumulated(ax, spectrum_4d, ki='kx'):
 
     k_list_dic = {'kx': kx_list, 'ky': ky_list, 'kz': kz_list}
     k_i = ki[0] + '_' + ki[1]
-    DO_LOG = False
+    DO_LOG = True
     if DO_LOG:
         contour = ax.contourf(k_list_dic[ki], omega_list, np.log(spec_for_plot))
         ax.set_title('$\\log{P}(\\omega ,' + k_i + ')$', fontsize=15)
@@ -63,7 +63,7 @@ def plot_omega_ki_plane_accumulated(ax, spectrum_4d, ki='kx'):
 if __name__ == '__main__':
     from parameters import dt, LEN_FFT, NUM_OF_OMEGAS, BIG_NUM_OMEGAS
 
-    # NUM_OF_OMEGAS = BIG_NUM_OMEGAS
+    NUM_OF_OMEGAS = BIG_NUM_OMEGAS
     #
     # spectrum_4d = np.load('modified_spectrum_4d_Eprime3.npy')
     # omega_list = 2 * np.pi * np.fft.rfftfreq(LEN_FFT, dt)[1:NUM_OF_OMEGAS]
@@ -72,11 +72,12 @@ if __name__ == '__main__':
     # spectrum_4d = np.load('spectrum_4d_B.npy')
     # omega_list = 2 * np.pi * np.fft.rfftfreq(LEN_FFT, dt)[:NUM_OF_OMEGAS]
 
-    # spectrum_4d = np.load('spectrum_4d_E.npy')
-    # omega_list = 2 * np.pi * np.fft.rfftfreq(LEN_FFT, dt)[:NUM_OF_OMEGAS]
-
-    spectrum_4d = np.load('inplasma_spectrum_Eprime3.npy')
+    spectrum_4d = np.load('spectrum_4d_Eprime3.npy')[1:]
     omega_list = 2 * np.pi * np.fft.rfftfreq(LEN_FFT, dt)[1:NUM_OF_OMEGAS]
+    # 除去零频率
+
+    # spectrum_4d = np.load('(new)inplasma_spectrum_Eprime2_waveletmodified.npy')
+    # omega_list = 2 * np.pi * np.fft.rfftfreq(LEN_FFT, dt)[1:NUM_OF_OMEGAS]
     '''
     remember: the in-plasma spectrum doesn't have omega = 0.
     '''
@@ -106,11 +107,11 @@ if __name__ == '__main__':
     # plt.colorbar(f, ax=axes[1, 2], format='%.1e')
 
     # plot the B-direction
-    B_avg = [-2.7201579, 17.27789, 34.078583]
+    B_avg = [-1.1795843, 14.4832115, 36.048206]
     zoom_rate = 300
-    axes[0, 0].arrow(0, 0, B_avg[1] / zoom_rate, B_avg[0] / zoom_rate, color='r',width=0.005)
-    axes[0, 1].arrow(0, 0, B_avg[2] / zoom_rate, B_avg[1] / zoom_rate, color='r',width=0.005)
-    axes[0, 2].arrow(0, 0, B_avg[2] / zoom_rate, B_avg[0] / zoom_rate, color='r',width=0.005)
+    axes[0, 0].arrow(0, 0, B_avg[1] / zoom_rate, B_avg[0] / zoom_rate, color='r', width=0.005)
+    axes[0, 1].arrow(0, 0, B_avg[2] / zoom_rate, B_avg[1] / zoom_rate, color='r', width=0.005)
+    axes[0, 2].arrow(0, 0, B_avg[2] / zoom_rate, B_avg[0] / zoom_rate, color='r', width=0.005)
 
     plt.savefig('images/anisotropic_accumulated_and_dispersion')
     # plt.show()
@@ -143,11 +144,13 @@ if __name__ == '__main__':
         omega_list = 2 * np.pi * np.fft.rfftfreq(LEN_FFT, dt)[:NUM_OF_OMEGAS]
 
         my_figure, axis = plt.subplots()
-        plt.plot(omega_list, 2 * spec ** 2 / LEN_FFT * dt)
+        normalized_spec = 2 * spec ** 2 / LEN_FFT * dt
+        plt.plot(omega_list[1:], normalized_spec[1:])
         plt.semilogy()
         plt.semilogx()
         plt.xlabel('omega(rad/s)')
         plt.ylabel('PSD(nT^2/Hz) * A CONSTANT')
+        plt.ylim(bottom=np.min(normalized_spec[1:])/2,top=np.max(normalized_spec[1:])*2)
         plt.title('PSD power law test')
         plt.savefig('images/power_law_test.png')
         # plt.show()
