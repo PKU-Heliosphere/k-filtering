@@ -31,8 +31,8 @@ def P_value(H_mat, M_mat):
     temp = dagger(H_mat)  # = H_dagger
     temp = dot(temp, inv(M_mat))  # = H_dagger * M_inv
     temp = dot(temp, H_mat)  # = H_dagger * M_inv * H
-    temp = inv(temp)  # = (H_dagger * M_inv * H)_inv
     try:
+        temp = inv(temp) # = (H_dagger * M_inv * H)_inv
         return trace(temp)
     except:
         print(temp)
