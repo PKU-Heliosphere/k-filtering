@@ -56,7 +56,7 @@ def build_M_matrices_list(all_sate_data):
     start_point = 0
     count = 0
     while start_point + LEN_FFT < LEN_DATA:
-        print(start_point)
+        print('FFT start point:',start_point)
         do_change_coordinate = False  # 改这里就好了改这里就好了改这里就好了改这里就好了改这里就好了
         if do_change_coordinate:
             # 下面几行是需要变换参考系，使得z朝向B_average的。
