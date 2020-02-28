@@ -9,7 +9,11 @@ def fft_one_satellite_one_interval(part_data, start_point=0):
     :param part_data: data from one satellite ONLY, cf. __main__ of this file
     :return: the FFT images
     """
-    Ax_avg, Ay_avg, Az_avg = part_data.mean(axis=0)
+    # Ax_avg, Ay_avg, Az_avg = part_data.T[:][start_point:start_point + LEN_FFT].mean(axis=0)
+    Ax_avg = part_data.T[0][start_point:start_point + LEN_FFT].mean()
+    Ay_avg = part_data.T[1][start_point:start_point + LEN_FFT].mean()
+    Az_avg = part_data.T[2][start_point:start_point + LEN_FFT].mean()
+
     Ax_series = part_data.T[0][start_point:start_point + LEN_FFT] - Ax_avg
     Ay_series = part_data.T[1][start_point:start_point + LEN_FFT] - Ay_avg
     Az_series = part_data.T[2][start_point:start_point + LEN_FFT] - Az_avg
@@ -41,7 +45,7 @@ def fft_all_satellite(all_sate_data, start_point=0):
     :return:
     """
     result = list()
-    num_of_omega = LEN_FFT//2+1  # =1024/2+1
+    num_of_omega = LEN_FFT // 2 + 1  # =1024/2+1
     for one_sate_data in all_sate_data:
         Ax_fft, Ay_fft, Az_fft = fft_one_satellite_one_interval(one_sate_data, start_point=start_point)
         result.append(reformat_fft_result(Ax_fft, Ay_fft, Az_fft))
