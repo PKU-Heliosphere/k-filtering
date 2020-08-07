@@ -1,5 +1,4 @@
 import numpy as np
-
 from parameters import LEN_FFT, dt
 
 
@@ -29,7 +28,7 @@ def fft_one_satellite_one_interval(part_data, start_point=0):
 def reformat_fft_result(Ax_fft, Ay_fft, Az_fft):
     """
     :return: reformatted data organized as
-            [omega1: (Ax_image, Ay_image, Az_image), omega2: (Ax_image, Ay_image, Az_image), ...]
+            [omega1: (Ax_image1, Ay_image1, Az_image1), omega2: (Ax_image2, Ay_image2, Az_image2), ...]
     """
     return list(zip(Ax_fft, Ay_fft, Az_fft))
 
@@ -45,7 +44,7 @@ def fft_all_satellite(all_sate_data, start_point=0):
     :return:
     """
     result = list()
-    num_of_omega = LEN_FFT // 2 + 1  # =1024/2+1
+    num_of_omega = LEN_FFT // 2 + 1
     for one_sate_data in all_sate_data:
         Ax_fft, Ay_fft, Az_fft = fft_one_satellite_one_interval(one_sate_data, start_point=start_point)
         result.append(reformat_fft_result(Ax_fft, Ay_fft, Az_fft))
@@ -54,25 +53,25 @@ def fft_all_satellite(all_sate_data, start_point=0):
     for res_one_sate in result[1:]:
         for index in range(num_of_omega):
             result[0][index] += res_one_sate[index]
-            # add components from other 3 satellites to the first satellite,
-            # so as to build shape: 513(omegas) * 12(components).
+            # reshape to: 513(omegas) * 12(components).
             # 20190714note: the '+=' here implies the addition of tuples, which connect 2 tuples rather than
             #               add the components like that in the numpy array.
     return result[0]
 
 
 if __name__ == '__main__':
-    from eingabe import input_data_B_field
-
-    t_s, s_data = input_data_B_field()
+    load_name = 'simulated_signal.npy'  # change this line to change the input file.
+    s_data = np.load(load_name)
 
     import time
 
     start = time.time()
 
-    fft_res = fft_one_satellite_one_interval(s_data[0], start_point=1024)
+    fft_res = fft_one_satellite_one_interval(s_data[2])
     fft_power = [abs(fft) ** 2 for fft in fft_res]
-    freqs = np.fft.rfftfreq(LEN_FFT, dt)
+    fft_real = [np.real(fft) for fft in fft_res]
+    fft_img = [np.imag(fft) for fft in fft_res]
+    omega_list = 2 * np.pi * np.fft.rfftfreq(LEN_FFT, dt)[:80]
     # check the power law of the spectrum
 
     a = fft_all_satellite(s_data)
@@ -84,9 +83,17 @@ if __name__ == '__main__':
 
     from matplotlib import pyplot as plt
 
-    plt.plot(freqs, fft_power[0], 'r.')
-    plt.plot(freqs, fft_power[1], 'g.')
-    plt.plot(freqs, fft_power[2], 'b.')
-    plt.semilogy()
-    plt.semilogx()
+    # plt.plot(omega_list, fft_power[0][:80], 'r')
+    # plt.plot(omega_list, fft_power[1][:80], 'g')
+    # plt.plot(omega_list, fft_power[2][:80], 'b')
+    plt.plot(omega_list, fft_real[0][:80], 'r')
+    plt.plot(omega_list, fft_real[1][:80], 'g')
+    plt.plot(omega_list, fft_real[2][:80], 'b')
+    plt.plot(omega_list, fft_img[0][:80], 'r', alpha=0.5)
+    plt.plot(omega_list, fft_img[1][:80], 'g', alpha=0.5)
+    plt.plot(omega_list, fft_img[2][:80], 'b', alpha=0.5)
+    plt.xlabel('omega')
+    plt.title('np.fft.rfft result | imaginary part being semi-transparent.')
+    # plt.semilogy()
+    # plt.semilogx()
     plt.show()

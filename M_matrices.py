@@ -21,17 +21,13 @@ def accumulate_A_vectors(all_sate_data):
     result = list()
     for i in range(LEN_FFT // 2 + 1):
         result.append(np.zeros(12, dtype='complex128'))
-    # print(np.shape(result))  # turns out to be (513, 12)
+    # print(np.shape(result))  # (513, 12)
     start_point = 0
     while start_point + LEN_FFT < LEN_DATA:
         fft_this_interval = fft_data.fft_all_satellite(all_sate_data=all_sate_data,
                                                        start_point=start_point)
-        # print('   ',fft_this_interval[0])
         for i in range(len(fft_this_interval)):
             result[i] += np.array(fft_this_interval[i])
-        # print(result[0])
-
-        # run the next line at the end of one cycle
         start_point += LEN_MOVE_ONCE
 
     return result
@@ -56,26 +52,9 @@ def build_M_matrices_list(all_sate_data):
     start_point = 0
     count = 0
     while start_point + LEN_FFT < LEN_DATA:
-        print('FFT start point:',start_point)
-        do_change_coordinate = False  # 改这里就好了改这里就好了改这里就好了改这里就好了改这里就好了
-        if do_change_coordinate:
-            # 下面几行是需要变换参考系，使得z朝向B_average的。
-            transformed_data_this_interval = \
-                coor_transform_Bavg_equals_Bz(all_sate_data[:, start_point:start_point + LEN_FFT])
-            all_sate_data_partially_altered = all_sate_data.copy()
-            all_sate_data_partially_altered[:, start_point:start_point + LEN_FFT] = transformed_data_this_interval
-            # 上面这三行：只对需要的那个部分做参考系变化。
-            fft_this_interval = fft_data.fft_all_satellite(all_sate_data=all_sate_data_partially_altered,
-                                                           start_point=start_point)
-
-            # 这下面一行呢，是不变换参考系的。
-        else:
-            fft_this_interval = fft_data.fft_all_satellite(all_sate_data=all_sate_data,
-                                                           start_point=start_point)
-
-            # 下面一行呢，是之前写的备注，体现出我的恐惧。
-            # 这里改了一下，传进去的数据是：all_sate_data，其他地方不变，但是在start_point开始的一个LEN_FFT变换了参考系
-            # 有点担心这个copy...
+        print('FFT start at point:', start_point)
+        fft_this_interval = fft_data.fft_all_satellite(all_sate_data=all_sate_data,
+                                                       start_point=start_point)
 
         for i in range(len(fft_this_interval)):
             result[i] += A_vec_to_M(np.array(fft_this_interval[i]))
@@ -86,16 +65,16 @@ def build_M_matrices_list(all_sate_data):
         count += 1
     for i in range(len(fft_this_interval)):
         result[i] = result[i] / count
-        # 除一下count做平均吧～
-        # 20190713晚上添加。
+        # do average
 
     return result
 
 
 if __name__ == '__main__':
-    from eingabe import input_data_B_field
+    from parameters import LEN_FFT, dt
 
-    t_s, s_data = input_data_B_field()
+    load_name = 'simulated_signal.npy'  # change this line to change the input file.
+    s_data = np.load(load_name)
 
     # check the first function: accumulate_A_vectors()
     res = accumulate_A_vectors(s_data)
@@ -107,6 +86,23 @@ if __name__ == '__main__':
     start = time.time()
     res = build_M_matrices_list(s_data)
     print(np.shape(res))
-    print(res[:1])
     end = time.time()
     print('It takes', end - start, 'second(s) to run the function: build_M_matrices_list() ')
+    np.set_printoptions(precision=1, linewidth=256)
+    omega_list = 2 * np.pi * np.fft.rfftfreq(LEN_FFT, dt)
+
+    # mat_inv = np.linalg.inv
+    import scipy.linalg
+
+    mat_inv = scipy.linalg.inv
+
+    see_num = 52
+    MA = res[see_num]
+    print(MA.dtype, res[0].dtype)
+    MAinv = mat_inv(MA)
+    print('M_A:\n', MA)
+    print(np.linalg.det(MA), np.linalg.cond(MA), np.linalg.det(MAinv), np.linalg.cond(MAinv), np.finfo(MA.dtype).eps)
+    print('==========\n{M_A}^-1\n', MAinv)
+    print(omega_list[see_num])
+    print('MA*MA^-1:\n', np.dot(MA, MAinv))
+    print(np.linalg.inv(MAinv) - MA)
