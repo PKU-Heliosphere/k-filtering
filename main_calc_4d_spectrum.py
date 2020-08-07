@@ -1,7 +1,7 @@
 """
 This is LinRonald's k-filtering project.
 We used structured data of magnetic or electric field sampled by several satellites to calculate the
-4 dimension spectrum of the wave in the space (omega, kx, ky, kz)
+4D spectrum of the wave in the space (omega, kx, ky, kz)
 
 the structured data should be like:
 [
@@ -10,14 +10,14 @@ the structured data should be like:
 ...
 ]
 
-My work started on March the 30th.
+This work started on March the 30th, 2019.
 
 """
 
 import numpy as np
-from location_and_klist import get_k_list, n_k
+from location_and_klist import get_k_list, N_k
 from M_matrices import build_M_matrices_list
-from filter_centrl_algrthm import H_matrix, P_value
+from filter_centrl_algrthm import H_matrix, P_value, P_value_MUSIC
 import time
 
 
@@ -27,43 +27,46 @@ def calc_spectrum_4d():
     The shape of the array: num of omega * num of kx * num of ky * num of kz.
     :return: None.
     """
-    from parameters import dt, LEN_FFT, LEN_MOVE_ONCE, NUM_OF_OMEGAS, BIG_NUM_OMEGAS
+    from parameters import dt, LEN_FFT, LEN_MOVE_ONCE, NUM_OF_OMEGAS, BIGGER_NUM_OF_OMEGAS
 
-    # BIG_NUM_OMEGAS = NUM_OF_OMEGAS
-    # BIG_NUM_OMEGAS is used to calculate P with many omegas so that one can then calculate P with omega_pl as the
+    # BIGGER_NUM_OF_OMEGAS = NUM_OF_OMEGAS
+    # BIGGER_NUM_OF_OMEGAS is used to calculate P with many omegas so that one can then calculate P with omega_pl as the
     # independent variable.
-    # if one want to use fewer omegas, just dis-comment 'BIG_NUM_OMEGAS = NUM_OF_OMEGAS'.
+    # if one want to use fewer omegas, just dis-comment 'BIGGER_NUM_OF_OMEGAS = NUM_OF_OMEGAS'.
 
-    load_name = 'format_E_brst_data.npy'  # change this line to change the input file.
+    load_name = 'simulated_signal.npy'  # change this line to change the input file.
     s_data = np.load(load_name)
-    save_name = 'spectrum_4d_E_bigomega'  # change this line to change the name of the saved file.
+    print('Data shape:', s_data.shape)
+    save_name = 'spectrum_4d_simulated'  # change this line to change the name of the saved file (need no .npy suffix)
 
-    M_mat_list = build_M_matrices_list(s_data)[:BIG_NUM_OMEGAS]
+    M_mat_list = build_M_matrices_list(s_data)[:BIGGER_NUM_OF_OMEGAS]
 
     k_list, kx_list, ky_list, kz_list = get_k_list()
 
     spectrum_4d = list()
 
-    omega_list = 2 * np.pi * np.fft.rfftfreq(LEN_FFT, dt)[:BIG_NUM_OMEGAS]
+    omega_list = 2 * np.pi * np.fft.rfftfreq(LEN_FFT, dt)[:BIGGER_NUM_OF_OMEGAS]
     print('#PARAMETERS#')
     print('load_name =', load_name, '| save_name =', save_name)
-    print('dt =', dt, '| LEN_FFT =', LEN_FFT, '| LEN_MOVE_ONCE =', LEN_MOVE_ONCE,'| numberOfOmegas =',BIG_NUM_OMEGAS)
+    print('dt =', dt, '| LEN_FFT =', LEN_FFT, '| LEN_MOVE_ONCE =', LEN_MOVE_ONCE, '| numberOfOmegas =',
+          BIGGER_NUM_OF_OMEGAS)
 
     count = 1
     for omega, M_this_omega in zip(omega_list, M_mat_list):
-        result = np.zeros((n_k, n_k + 1, n_k - 1), dtype=np.double)
+        result = np.zeros((N_k, N_k + 1, N_k - 1), dtype=np.double)
         n = 0
         start = time.time()
 
-        for i in range(n_k):
-            for j in range(n_k + 1):
-                for l in range(n_k - 1):
-                    result[i, j, l] = np.real(P_value(H_matrix(k_list[n]), M_this_omega))  # calculate P
+        for i in range(N_k):
+            for j in range(N_k + 1):
+                for l in range(N_k - 1):
+                    result[i, j, l] = np.abs(
+                        P_value_MUSIC(H_matrix(k_list[n]), M_this_omega, automode=1))  # calculate P
                     n = n + 1
 
         end = time.time()
-        print('n k total = ' + str(n) + ', it takes', end - start, 'second(s) to calculate using this omega:',
-              omega, '(' + str(count) + '/' + str(BIG_NUM_OMEGAS) + ')')
+        print('n k total = ' + str(n) + ', it takes', end - start, 'second(s) to calculate with omega =',
+              omega, '(' + str(count) + '/' + str(BIGGER_NUM_OF_OMEGAS) + ')')
         spectrum_4d.append(result)
         count += 1
 
