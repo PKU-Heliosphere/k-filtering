@@ -1,6 +1,10 @@
 import numpy as np
 from parameters import LEN_FFT, dt
-
+from scipy.signal import get_window
+# WINDOWTYPE = 'hamming'
+# WINDOWTYPE = 'cosine'
+WINDOWTYPE = 'boxcar'
+w = get_window(WINDOWTYPE, LEN_FFT)
 
 def fft_one_satellite_one_interval(part_data, start_point=0):
     """
@@ -17,9 +21,9 @@ def fft_one_satellite_one_interval(part_data, start_point=0):
     Ay_series = part_data.T[1][start_point:start_point + LEN_FFT] - Ay_avg
     Az_series = part_data.T[2][start_point:start_point + LEN_FFT] - Az_avg
 
-    Ax_fft = np.fft.rfft(Ax_series)
-    Ay_fft = np.fft.rfft(Ay_series)
-    Az_fft = np.fft.rfft(Az_series)
+    Ax_fft = np.fft.rfft(Ax_series*w)
+    Ay_fft = np.fft.rfft(Ay_series*w)
+    Az_fft = np.fft.rfft(Az_series*w)
     # formerly used scipy.fft(), but negative omega makes no sense in our case.
 
     return Ax_fft, Ay_fft, Az_fft
@@ -60,7 +64,7 @@ def fft_all_satellite(all_sate_data, start_point=0):
 
 
 if __name__ == '__main__':
-    load_name = 'simulated_signal.npy'  # change this line to change the input file.
+    load_name = 'rotated_interped_Eprime3_data.npy'  # change this line to change the input file.
     s_data = np.load(load_name)
 
     import time

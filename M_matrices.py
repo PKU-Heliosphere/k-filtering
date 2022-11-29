@@ -1,7 +1,7 @@
 import fft_data
 import numpy as np
 from parameters import LEN_FFT, LEN_DATA, LEN_MOVE_ONCE
-from coor_transform import coor_transform_Bavg_equals_Bz
+import random
 
 
 def accumulate_A_vectors(all_sate_data):
@@ -39,6 +39,23 @@ def A_vec_to_M(A_vec):
     A_dag = A_copy.T.conj()
     return A_copy * A_dag
 
+def A_vec_to_M_with_manual_noise(A_vec):
+    M = A_vec_to_M(A_vec)
+    power = M.trace()
+    noise_level = 0.01/12
+    M_dim = M.shape[0]
+    diag = np.random.random(M_dim)*power*noise_level
+    M = M + np.eye(M_dim)*diag
+    return M
+
+def A_vec_to_M_with_epsilon(A_vec):
+    M = A_vec_to_M(A_vec)
+    power = M.trace()
+    epsilon_ratio = 0.001*0.001/4
+    M_dim = M.shape[0]
+    diag = [power*epsilon_ratio,]*M_dim
+    M = M + np.diag(diag)
+    return M    
 
 def build_M_matrices_list(all_sate_data):
     """
@@ -57,7 +74,7 @@ def build_M_matrices_list(all_sate_data):
                                                        start_point=start_point)
 
         for i in range(len(fft_this_interval)):
-            result[i] += A_vec_to_M(np.array(fft_this_interval[i]))
+            result[i] += A_vec_to_M_with_epsilon(np.array(fft_this_interval[i]))
             # calculate A*A.T.conj this line
 
         # run the next line at the end of one cycle
@@ -73,7 +90,7 @@ def build_M_matrices_list(all_sate_data):
 if __name__ == '__main__':
     from parameters import LEN_FFT, dt
 
-    load_name = 'simulated_signal.npy'  # change this line to change the input file.
+    load_name = 'rotated_interped_Eprime3_data.npy'  # change this line to change the input file.
     s_data = np.load(load_name)
 
     # check the first function: accumulate_A_vectors()

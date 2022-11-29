@@ -27,29 +27,24 @@ def calc_spectrum_4d():
     The shape of the array: num of omega * num of kx * num of ky * num of kz.
     :return: None.
     """
-    from parameters import dt, LEN_FFT, LEN_MOVE_ONCE, NUM_OF_OMEGAS, BIGGER_NUM_OF_OMEGAS
+    from parameters import dt, LEN_FFT, LEN_MOVE_ONCE, NUM_OF_OMEGAS
 
-    # BIGGER_NUM_OF_OMEGAS = NUM_OF_OMEGAS
-    # BIGGER_NUM_OF_OMEGAS is used to calculate P with many omegas so that one can then calculate P with omega_pl as the
-    # independent variable.
-    # if one want to use fewer omegas, just dis-comment 'BIGGER_NUM_OF_OMEGAS = NUM_OF_OMEGAS'.
-
-    load_name = 'simulated_signal.npy'  # change this line to change the input file.
+    load_name = 'simulated_signal_by_wave_generator.npy'  # change this line to change the input file.
     s_data = np.load(load_name)
     print('Data shape:', s_data.shape)
     save_name = 'spectrum_4d_simulated'  # change this line to change the name of the saved file (need no .npy suffix)
 
-    M_mat_list = build_M_matrices_list(s_data)[:BIGGER_NUM_OF_OMEGAS]
+    M_mat_list = build_M_matrices_list(s_data)[:NUM_OF_OMEGAS]
 
     k_list, kx_list, ky_list, kz_list = get_k_list()
 
     spectrum_4d = list()
 
-    omega_list = 2 * np.pi * np.fft.rfftfreq(LEN_FFT, dt)[:BIGGER_NUM_OF_OMEGAS]
+    omega_list = 2 * np.pi * np.fft.rfftfreq(LEN_FFT, dt)[:NUM_OF_OMEGAS]
     print('#PARAMETERS#')
     print('load_name =', load_name, '| save_name =', save_name)
     print('dt =', dt, '| LEN_FFT =', LEN_FFT, '| LEN_MOVE_ONCE =', LEN_MOVE_ONCE, '| numberOfOmegas =',
-          BIGGER_NUM_OF_OMEGAS)
+          NUM_OF_OMEGAS)
 
     count = 1
     for omega, M_this_omega in zip(omega_list, M_mat_list):
@@ -66,7 +61,7 @@ def calc_spectrum_4d():
 
         end = time.time()
         print('n k total = ' + str(n) + ', it takes', end - start, 'second(s) to calculate with omega =',
-              omega, '(' + str(count) + '/' + str(BIGGER_NUM_OF_OMEGAS) + ')')
+              omega, '(' + str(count) + '/' + str(NUM_OF_OMEGAS) + ')')
         spectrum_4d.append(result)
         count += 1
 
